@@ -1,0 +1,28 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div style="height: 40px; background-color: blue;">
+      <h2>wow</h2>
+      {% for each in results.category %}
+      <div>
+        <h1>Category {{each}}</h1>
+        <h2></h2>
+        {%for food in results.food%}
+        <ul>
+          {%if food.food_category_id == each.id %}
+          <li>{{food}}</li>
+          {%endif%}
+        </ul>
+        {%endfor%}
+      </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>
