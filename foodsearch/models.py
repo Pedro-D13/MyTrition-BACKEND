@@ -11,6 +11,21 @@ from django.db import models
 
 from django.db import models
 
+class BrandedFoodCategory(models.Model):
+    fdc_id = models.BigIntegerField(primary_key=True, unique=True)
+    ingredients = models.TextField(blank=True, null=True)
+    serving_size = models.FloatField(blank=True, null=True)
+    serving_size_unit = models.TextField(blank=True, null=True)
+    branded_food_category = models.TextField(blank=True, null=True)
+
+
+    class Meta:
+        managed = False
+        db_table = 'branded_food_category'
+    
+    def __str__(self):
+        return f"{self.branded_food_category}"
+
 class FoodDescription(models.Model):
     fdc_id = models.BigIntegerField(primary_key=True,unique=True)
     data_type = models.TextField(blank=True, null=True)
@@ -44,7 +59,7 @@ class FoodNutrient(models.Model):
         db_table = 'food_nutrient'
 
     def __str__(self):
-        return f"FoodNut:{self.amount}, {self.fdc_id},{self.id}"
+        return f"FoodNut:{self.amount}"
 
 
 class FoodCategory(models.Model):
@@ -55,6 +70,7 @@ class FoodCategory(models.Model):
     class Meta:
         managed = False
         db_table = 'food_category'
+        ordering = ['description']
 
     def __str__(self):
         return f"{self.description}"
