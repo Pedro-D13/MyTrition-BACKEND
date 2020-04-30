@@ -23,15 +23,30 @@ class BrandedFoodCategory(models.Model):
         managed = False
         db_table = 'branded_food_category'
     
-    def __str__(self):
+    def __str__(self): 
         return f"{self.branded_food_category}"
+
+class FoodData(models.Model):
+    fdc_id = models.BigIntegerField(primary_key=True,unique=True)
+    data_type = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    food_category_id = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'food_data'
+        ordering = ['food_category_id']
+
+    def __str__(self): 
+        return f"{self.description}"
+
 
 class FoodDescription(models.Model):
     fdc_id = models.BigIntegerField(primary_key=True,unique=True)
     data_type = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     food_category_id = models.FloatField(blank=True, null=True)
-    publication_date = models.TextField(blank=True, null=True)
+
 
     class Meta:
         managed = False

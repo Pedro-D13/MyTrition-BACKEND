@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'foodsearch.apps.FoodsearchConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [

@@ -1,6 +1,6 @@
 # Django imports
 from django.shortcuts import render, get_object_or_404
-from foodsearch.models import FoodCategory,FoodDescription, FoodNutrient,Nutrient
+from foodsearch.models import FoodCategory,FoodDescription, FoodNutrient,Nutrient,FoodData
 from foodsearch.serializers import (
         FoodCategorySerializer,FoodDescriptionSerializer,FoodNutrientSerializer,NutrientSerializer)
 from django.contrib.postgres.search import SearchVector
@@ -34,13 +34,15 @@ class FoodDescriptionVS(viewsets.ViewSet):
     Energy,
     Sugars totalincluding NLEA
     '''
-    ids=[2000,1003,1004,1008,1005]
-
-
+    ids = [2000,1003,1004,1008,1005]
+    foodDataQS = FoodData.objects.all()
 
     def list(self,request,cat_id,desc):
-        desc= FoodDescription.objects.filter(description__search=desc,food_category_id=cat_id)
-        serializer = FoodDescriptionSerializer(desc,many=True)
+        foodDescQS = FoodDescription.objects.filter(food_category_id=cat_id)
+        result1 = self.foodDataQS.filter(description__search=desc)
+        result2 = foodDescQS.filter(description__search=desc)
+        result1.union(result1,result2)
+        serializer = FoodDescriptionSerializer(result1,many=True)
         return Response(serializer.data)
 
     def retrieve(self,request,**kwags):
@@ -48,7 +50,8 @@ class FoodDescriptionVS(viewsets.ViewSet):
         nutr_serializer = FoodNutrientSerializer(nutr, many=True)
         result = map(lambda each_nutr: Nutrient.objects.get(id=each_nutr.nutrient_id), nutr)
         serializer = NutrientSerializer(result, many=True)
-        final_result = zip(serializer.data , nutr_serializer.data)
+        zipped_result = zip(serializer.data , nutr_serializer.data)
+        final_result = [ dict(**k1, **k2) for (k1,k2) in zipped_result]
         return Response(final_result)
 
 
