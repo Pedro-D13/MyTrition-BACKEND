@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FoodCategory,FoodDescription, FoodNutrient,Nutrient
+from .models import FoodCategory,FoodDescription, FoodNutrient,Nutrient,BrandedFoodCategory
 
 class FoodCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,3 +23,8 @@ class NutrientSerializer(serializers.ModelSerializer):
         model = Nutrient
         fields= ['name','unit_name']
 
+
+class BrandedFoodCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BrandedFoodCategory
+        fields = ['fdc_id','branded_food_category']

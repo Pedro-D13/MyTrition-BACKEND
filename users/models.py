@@ -29,6 +29,7 @@ def save_user_profile(sender, instance, **kwargs):
 
 class FoodFavourites(models.Model):
     fdc_id = models.BigIntegerField()
+     
 
 
 
