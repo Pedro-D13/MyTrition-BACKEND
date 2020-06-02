@@ -4,12 +4,14 @@ from foodsearch.models import FoodCategory,FoodDescription, FoodNutrient,Nutrien
 from foodsearch.serializers import (
         FoodCategorySerializer,FoodDescriptionSerializer,FoodNutrientSerializer,BrandedFoodCategorySerializer,NutrientSerializer)
 from django.contrib.postgres.search import SearchVector
-
+from django.http import HttpResponse, Http404
 
 # DRF imports
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import exception_handler
 
 class ListCategoryVS(viewsets.ViewSet):
     # List all the food categories to choose from before making a search
@@ -42,6 +44,7 @@ class FoodDescriptionVS(viewsets.ViewSet):
         serializer = FoodDescriptionSerializer(foodDescQS,many=True)
         return Response(serializer.data[:50])
 
+
     def retrieve(self,request,**kwags):
         nutr = FoodNutrient.objects.filter(fdc_id=self.kwargs['fdc_id_arg'] , nutrient_id__in=self.ids)
         nutr_serializer = FoodNutrientSerializer(nutr, many=True)
@@ -53,18 +56,24 @@ class FoodDescriptionVS(viewsets.ViewSet):
 
 
 class BrandedFoodListVS(viewsets.ViewSet):
-    # list all the categories
-    def listCat(self,request, desc):
-        qs = FoodDescription.objects.filter(description__search=desc).exclude(
-            brandedfoodcategory__branded_food_category__isnull=True
-        )
-        brandedFoods= BrandedFoodCategory.objects.filter(fdc_id__in=qs)
+    # list all the categoriess
+    def listCat(self,request,desc):
+        branded = FoodDescription.objects.filter(description__search=desc).prefetch_related('brandedfoodcategory').values('fdc_id').order_by()
+        brandedFoods= BrandedFoodCategory.objects.filter(fdc_id__in=branded)
         brandedFoodsCats=brandedFoods.distinct('branded_food_category')
-        serializer = BrandedFoodCategorySerializer(brandedFoodsCats, many=True)
+        serializer= BrandedFoodCategorySerializer(brandedFoodsCats, many=True)
+        if serializer.data == []:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.data)
 
+    def listGenCat(self,request,desc):
+        generic = FoodDescription.objects.filter(description__search=desc).prefetch_related('foodcategory').values('food_category_id').order_by()
+        genericFoodsCats=FoodCategory.objects.filter(id__in=generic)
+        serializer2 = FoodCategorySerializer(genericFoodsCats, many= True)
+
+
     def listItemsFromCat(self,request,desc,cat):
-        final_result=FoodDescription.objects.filter(description__search=desc,brandedfoodcategory__branded_food_category__search=cat)
+        final_result=FoodDescription.objects.filter(description__search=desc,brandedfoodcategory__branded_food_category__search=cat).prefetch_related('brandedfoodcategory').values('description','fdc_id').order_by()
         serializer = FoodDescriptionSerializer(final_result,many=True)
         return Response(serializer.data)
 

@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+# z763X8YFlQ3mDOXRRlonqn3FvuCcbjqJD7EpQx26 client id
+# x2DB3ZkC4SVFf5kqafubthqqk9HQZyGn5AjalzS1XVKCkJCcEzSoLb44zTepSki6P5jueZqIae21VWpx4ueTTsmumJqy6MQoU7jOq6eXNVdapo4aryZ0I4KvTeQ6nTJ0 client secret key
+
+
 import os
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,11 +30,20 @@ SECRET_KEY = os.environ.get('MY_TRITION_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ALLOWED_HOSTS = []
+# this needs to be changed during deployment
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:4200',
 
 )
+
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+
+]
 
 # Application definition
 
@@ -41,14 +55,30 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
+    'debug_toolbar',
+    
+    'django.contrib.sites',
     'corsheaders',
-    'rest_framework',
     'foodsearch.apps.FoodsearchConfig',
-    'users.apps.UsersConfig',
+    'accounts.apps.AccountsConfig',
+    
+    # django rest auth
+    'rest_framework.authtoken',
+    'rest_auth.registration',
+    'rest_auth',
+    'rest_framework',
+    "oauth2_provider",
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.twitter',
+
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -115,7 +145,14 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 50,
+     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    ]
 }
+
+REST_USE_JWT = True
+SITE_ID = 1
+
 
 
 # Internationalization
@@ -136,3 +173,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

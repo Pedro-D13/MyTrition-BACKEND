@@ -11,16 +11,15 @@ from django.db import models
 
 
 class FoodDescription(models.Model):
-    fdc_id = models.BigIntegerField(primary_key=True,unique=True)
-    data_type = models.TextField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    food_category_id = models.FloatField(blank=True, null=True)
-
+    fdc_id = models.IntegerField(primary_key=True,unique=True)
+    description = models.TextField(blank=True, null=True,  db_index=True)
+    food_category_id = models.IntegerField(blank=True, null=True, unique=True)
 
     class Meta:
         managed = False
         db_table = 'food_description'
         ordering = ['food_category_id']
+
 
     def __str__(self):
         return f"{self.description}"
@@ -28,9 +27,9 @@ class FoodDescription(models.Model):
 class BrandedFoodCategory(models.Model):
     fdc_id = models.OneToOneField(FoodDescription,to_field="fdc_id",db_column="fdc_id", on_delete=models.DO_NOTHING,primary_key=True)
     ingredients = models.TextField(blank=True, null=True)
-    serving_size = models.FloatField(blank=True, null=True)
-    serving_size_unit = models.TextField(blank=True, null=True)
-    branded_food_category = models.TextField(blank=True, null=True)
+    # serving_size = models.FloatField(blank=True, null=True)
+    # serving_size_unit = models.TextField(blank=True, null=True)
+    branded_food_category = models.TextField(blank=True, null=True, db_index=True)
 
     class Meta:
         managed = False
@@ -43,29 +42,23 @@ class BrandedFoodCategory(models.Model):
 
 
 class FoodNutrient(models.Model):
-    id = models.BigIntegerField(primary_key=True,unique=True)
+    id = models.IntegerField(primary_key=True,unique=True)
     fdc_id = models.ForeignKey(FoodDescription,db_column="fdc_id", on_delete=models.DO_NOTHING, null=True)
-    nutrient_id = models.BigIntegerField(blank=True, null=True)
+    nutrient_id = models.IntegerField(blank=True, null=True)
     amount = models.FloatField(blank=True, null=True)
-    data_points = models.FloatField(blank=True, null=True)
-    derivation_id = models.FloatField(blank=True, null=True)
-    min = models.FloatField(blank=True, null=True)
-    max = models.FloatField(blank=True, null=True)
-    median = models.FloatField(blank=True, null=True)
-    footnote = models.TextField(blank=True, null=True)
-    min_year_acquired = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'food_nutrient'
+
 
     def __str__(self):
         return f"FoodNut:{self.amount}"
 
 
 class FoodCategory(models.Model):
-    id = models.BigIntegerField(primary_key=True, unique=True)
-    code = models.BigIntegerField(blank=True, null=True)
+    id = models.OneToOneField(FoodDescription ,to_field="food_category_id",db_column='id' ,primary_key=True,on_delete=models.DO_NOTHING)
+    code = models.IntegerField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -78,15 +71,10 @@ class FoodCategory(models.Model):
 
 class FoodPortion(models.Model):
     fdc_id = models.ForeignKey(FoodDescription,db_column="fdc_id" ,on_delete=models.DO_NOTHING,blank=True, null=True)
-    id = models.BigIntegerField(primary_key=True,unique=True)
-    seq_num = models.FloatField(blank=True, null=True)
+    id = models.IntegerField(primary_key=True,unique=True)
     amount = models.FloatField(blank=True, null=True)
-    measure_unit_id = models.BigIntegerField(blank=True, null=True)
+    measure_unit_id = models.IntegerField(blank=True, null=True)
     portion_description = models.TextField(blank=True, null=True)
-    modifier = models.TextField(blank=True, null=True)
-    gram_weight = models.FloatField(blank=True, null=True)
-    data_points = models.FloatField(blank=True, null=True)
-    footnote = models.FloatField(blank=True, null=True)
 
 
     class Meta:
@@ -98,7 +86,7 @@ class FoodPortion(models.Model):
 
 
 class MeasuringUnit(models.Model):
-    id = models.BigIntegerField(primary_key=True,unique=True)
+    id = models.IntegerField(primary_key=True,unique=True)
     name = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -111,7 +99,7 @@ class MeasuringUnit(models.Model):
 
 class Nutrient(models.Model):
     # Food nutrient are defined in 100g/ 100ml units by default, do the conversions for other units 
-    id = models.BigIntegerField(primary_key=True,unique=True)
+    id = models.IntegerField(primary_key=True,unique=True)
     name = models.TextField(blank=True, null=True)
     unit_name = models.TextField(blank=True, null=True)
     nutrient_nbr = models.FloatField(blank=True, null=True)

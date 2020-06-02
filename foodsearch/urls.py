@@ -15,7 +15,8 @@ urlpatterns = [
     path('categories/<int:cat_id>/desc/<str:desc>/<int:fdc_id_arg>/', FoodDescriptionVS.as_view({'get':'retrieve'})),
     path('<str:desc>/desc/', BrandedFoodListVS.as_view({'get':'listCat'})),
     path('<str:desc>/desc/<str:cat>/category/', BrandedFoodListVS.as_view({'get':'listItemsFromCat'})),
-    path('macros/<int:fdc_id_arg>/',NutrientDataVS.as_view({'get':'retrieve'})),
+    path('<int:fdc_id_arg>/macros/',NutrientDataVS.as_view({'get':'retrieve'})),
+    
 ]
 
 
