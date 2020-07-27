@@ -2,7 +2,7 @@
 from django.shortcuts import render, get_object_or_404
 from foodsearch.models import FoodCategory,FoodDescription, FoodNutrient,Nutrient,BrandedFoodCategory
 from foodsearch.serializers import (
-        FoodCategorySerializer,FoodDescriptionSerializer,FoodNutrientSerializer,BrandedFoodCategorySerializer,NutrientSerializer)
+        FoodCategorySerializer,FoodDescriptionSerializer,FoodNutrientSerializer,BrandedFoodCategorySerializer,NutrientSerializer,NutritionConverter)
 from django.contrib.postgres.search import SearchVector
 from django.http import HttpResponse, Http404
 
@@ -28,42 +28,36 @@ class ListCategoryVS(viewsets.ViewSet):
         return Response(serializer.data)
     
 
-class FoodDescriptionVS(viewsets.ViewSet):
-    ''' 
-    ids for Protein,
-    Total lipid (fat),
-    Carbohydrate, by difference,
-    Energy,
-    Sugars totalincluding NLEA
-    '''
-    ids = [2000,1003,1004,1008,1005]
+# class FoodDescriptionVS(viewsets.ViewSet):
+#     ''' 
+#     ids for Protein,
+#     Total lipid (fat),
+#     Carbohydrate, by difference,
+#     Energy,
+#     Sugars totalincluding NLEA
+#     '''
+#     ids = [2000,1003,1004,1008,1005]
 
 
-    def list(self,request,cat_id,desc):
-        foodDescQS = FoodDescription.objects.filter(food_category_id=cat_id , description__search=desc)
-        serializer = FoodDescriptionSerializer(foodDescQS,many=True)
-        return Response(serializer.data[:50])
+#     def list(self,request,cat_id,desc):
+#         foodDescQS = FoodDescription.objects.filter(food_category_id=cat_id , description__search=desc)
+#         serializer = FoodDescriptionSerializer(foodDescQS,many=True)
+#         return Response(serializer.data[:50])
 
 
-    def retrieve(self,request,**kwags):
-        nutr = FoodNutrient.objects.filter(fdc_id=self.kwargs['fdc_id_arg'] , nutrient_id__in=self.ids)
-        nutr_serializer = FoodNutrientSerializer(nutr, many=True)
-        result = map(lambda each_nutr: Nutrient.objects.get(id=each_nutr.nutrient_id), nutr)
-        serializer = NutrientSerializer(result, many=True)
-        zipped_result = zip(serializer.data , nutr_serializer.data)
-        final_result = [ dict(**k1, **k2) for (k1,k2) in zipped_result]
-        return Response(final_result[:50])
-
+#     def retrieve(self,request,**kwags):
+#         final_result = NutritionConverter(self)
+#         return Response(final_result)
 
 class BrandedFoodListVS(viewsets.ViewSet):
     # list all the categoriess
     def listCat(self,request,desc):
-        branded = FoodDescription.objects.filter(description__search=desc).prefetch_related('brandedfoodcategory').values('fdc_id').order_by()
+        branded = FoodDescription.objects.filter(description__search=desc).prefetch_related('brandedfoodcategory').values('fdc_id')
         brandedFoods= BrandedFoodCategory.objects.filter(fdc_id__in=branded)
         brandedFoodsCats=brandedFoods.distinct('branded_food_category')
-        serializer= BrandedFoodCategorySerializer(brandedFoodsCats, many=True)
-        if serializer.data == []:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = BrandedFoodCategorySerializer(brandedFoodsCats, many=True)
+        if len(serializer.data) is 0:
+            return Response(data="Not found",status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.data)
 
     def listGenCat(self,request,desc):
@@ -80,26 +74,5 @@ class BrandedFoodListVS(viewsets.ViewSet):
 class NutrientDataVS(viewsets.ViewSet):
     ids = [2000,1003,1004,1008,1005]
     def retrieve(self,request,**kwags):
-        nutr = FoodNutrient.objects.filter(fdc_id=self.kwargs['fdc_id_arg'] , nutrient_id__in=self.ids)
-        nutr_serializer = FoodNutrientSerializer(nutr, many=True)
-        result = map(lambda each_nutr: Nutrient.objects.get(id=each_nutr.nutrient_id), nutr)
-        serializer = NutrientSerializer(result, many=True)
-        zipped_result = zip(serializer.data , nutr_serializer.data)
-        final_result = [ dict(**k1, **k2) for (k1,k2) in zipped_result]
+        final_result = NutritionConverter(self,request)
         return Response(final_result)
-
-    def retrieve(self,request,**kwags):
-        nutr = FoodNutrient.objects.filter(fdc_id=self.kwargs['fdc_id_arg'] , nutrient_id__in=self.ids)
-        nutr_serializer = FoodNutrientSerializer(nutr, many=True)
-        result = map(lambda each_nutr: Nutrient.objects.get(id=each_nutr.nutrient_id), nutr)
-        serializer = NutrientSerializer(result, many=True)
-        zipped_result = zip(serializer.data , nutr_serializer.data)
-        final_result = [ dict(**k1, **k2) for (k1,k2) in zipped_result]
-        return Response(final_result)
-
-
-
-    # branded = BrandedFoodCategory.objects.filter()
-    # unbranded = FoodDescription.objects.filter()
-    # milk = FoodDescription.objects.filter(description__search="milk").exclude(brandedfoodcategory__branded_food_category__isnull=True)
-    # milk_snacks=FoodDescription.objects.filter(description__search="milk", brandedfoodcategory__branded_food_category="Snacks")

@@ -63,17 +63,9 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     
     # django rest auth
-    'rest_framework.authtoken',
-    'rest_auth.registration',
-    'rest_auth',
     'rest_framework',
-    "oauth2_provider",
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.facebook',
-    'allauth.socialaccount.providers.twitter',
-
+    'rest_framework.authtoken',
+    'djoser',
 ]
 
 MIDDLEWARE = [
@@ -145,12 +137,15 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 50,
-     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-    ]
+    'DEFAULT_AUTHENTICATION_CLASSES':(
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    "PERMISSIONS":{
+        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly']
+    }
 }
 
-REST_USE_JWT = True
+
 SITE_ID = 1
 
 

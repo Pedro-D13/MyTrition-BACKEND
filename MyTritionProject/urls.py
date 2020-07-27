@@ -19,19 +19,23 @@ from django.conf import settings
 from django.contrib.auth import views as auth_views
 
 from django.urls import re_path
-from allauth.account.views import confirm_email
+from django.conf.urls import url
 
+from accounts.views import AccountsFavFoodListVS
 urlpatterns = [
-    path('foodsearch/', include('foodsearch.urls')),
-    path("rest-auth/", include('rest_auth.urls')), 
-    path("rest-auth/registration/", include("rest_auth.registration.urls")),
-    path('users/', include('django.contrib.auth.urls')),
-    # path('profile/', )
+    
     path('admin/', admin.site.urls),
-    # path('account-confirm-email/<r"^(?P<slug>[-\w]+)/$">', confirm_email, name="account_confirm_email"),
+    path('foodsearch/', include('foodsearch.urls')),
+    path('auth/', include('djoser.urls.jwt')),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
+    path('users/', include('django.contrib.auth.urls')),
+    path('profile/', AccountsFavFoodListVS.as_view({'get':'list'})),
+    path('profile/<int:fdc_id_arg>/', AccountsFavFoodListVS.as_view({'post':'create','delete':'destroy'})),
+
 ]
 
- 
+
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [
@@ -41,6 +45,7 @@ if settings.DEBUG:
         # url(r'^__debug__/', include(debug_toolbar.urls)),
 
     ] + urlpatterns
+
 
 
 
