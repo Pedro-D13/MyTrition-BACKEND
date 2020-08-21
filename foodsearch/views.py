@@ -52,7 +52,7 @@ class ListCategoryVS(viewsets.ViewSet):
 class BrandedFoodListVS(viewsets.ViewSet):
     # list all the categoriess
     def listCat(self,request,desc):
-        branded = FoodDescription.objects.filter(description__search=desc).prefetch_related('brandedfoodcategory').values('fdc_id')
+        branded = FoodDescription.objects.filter(description__search=desc).prefetch_related('brandedfoodcategory').values('fdc_id').exclude(brandedfoodcategory__branded_food_category__isnull=True)
         brandedFoods= BrandedFoodCategory.objects.filter(fdc_id__in=branded)
         brandedFoodsCats=brandedFoods.distinct('branded_food_category')
         serializer = BrandedFoodCategorySerializer(brandedFoodsCats, many=True)

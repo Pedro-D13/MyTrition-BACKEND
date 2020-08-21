@@ -31,18 +31,23 @@ SECRET_KEY = os.environ.get('MY_TRITION_KEY')
 DEBUG = True
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'testserver'
+]
+
+
 # this needs to be changed during deployment
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:4200',
-
 )
+
 
 
 INTERNAL_IPS = [
     '127.0.0.1',
-
 ]
 
 # Application definition
@@ -136,7 +141,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 50,
+    # 'PAGE_SIZE': 50,
     'DEFAULT_AUTHENTICATION_CLASSES':(
         'rest_framework.authentication.TokenAuthentication',
     ),
@@ -171,3 +176,6 @@ STATIC_URL = '/static/'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+
